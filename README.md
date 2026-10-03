@@ -173,5 +173,9 @@ cd web && python3 -m http.server 8080
 Dafür in `web/config.js` kurzzeitig `http://127.0.0.1:8787` eintragen und
 `http://127.0.0.1:8080/index.html#t=testtoken1234567890abcd` öffnen.
 
+Der lokale `wrangler dev` liest `ALLOWED_ORIGIN` aus `wrangler.toml` und erlaubt damit nur
+die Pages-Adresse. Für lokales Arbeiten dort vorübergehend `"*"` oder
+`"http://127.0.0.1:8080"` eintragen — aber **nicht in diesem Zustand deployen**.
+
 > Läuft etwas nicht, ist fast immer die Node-Version schuld: `node --version` muss 22+
 > zeigen. Wrangler bricht sonst mit einem klaren Hinweis ab.
