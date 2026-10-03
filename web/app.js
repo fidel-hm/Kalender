@@ -384,9 +384,12 @@ function copyField(input) {
   note('Link kopiert.');
 }
 
-el('whoami').addEventListener('click', () => {
-  el('profile').open = true;
-  el('profile').scrollIntoView({ behavior: 'smooth', block: 'start' });
+el('whoami').addEventListener('click', () => el('profile').showModal());
+el('profile-close').addEventListener('click', () => el('profile').close());
+
+// Klick neben den Dialog schliesst ihn ebenfalls.
+el('profile').addEventListener('click', (clickEvent) => {
+  if (clickEvent.target === el('profile')) el('profile').close();
 });
 
 el('ics-copy').addEventListener('click', () => copyField(el('ics-url')));
@@ -403,13 +406,16 @@ el('palette').addEventListener('click', (clickEvent) => {
   el('whoami').style.color = textOn(swatch.dataset.color);
 });
 
-// Zuklappen ohne Speichern verwirft die Vorschau wieder.
-el('profile').addEventListener('toggle', () => {
-  if (!el('profile').open) {
-    el('profile-error').hidden = true;
-    renderProfile();
-  }
-});
+// Schliessen ohne Speichern (Knopf, Escape oder Klick daneben) verwirft die Vorschau.
+// Welches Ereignis dabei kommt, ist browserabhaengig: Chrome meldet derzeit nur
+// 'toggle', Safari 'close'. Beide abfangen; der Handler ist mehrfach gefahrlos.
+function profilVerwerfen() {
+  if (el('profile').open) return;
+  el('profile-error').hidden = true;
+  renderProfile();
+}
+el('profile').addEventListener('close', profilVerwerfen);
+el('profile').addEventListener('toggle', profilVerwerfen);
 
 el('profile-form').addEventListener('submit', async (submitEvent) => {
   submitEvent.preventDefault();
@@ -425,7 +431,7 @@ el('profile-form').addEventListener('submit', async (submitEvent) => {
       }),
     });
     await refresh();
-    el('profile').open = false;
+    el('profile').close();
     note('Profil gespeichert.');
   } catch (err) {
     errorBox.textContent = err.message;

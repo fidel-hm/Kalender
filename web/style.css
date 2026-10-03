@@ -100,7 +100,7 @@ summary.button { list-style: none; width: 100%; text-align: center; margin-botto
 summary.button::-webkit-details-marker { display: none; }
 
 details#new-event[open] summary.button { margin-bottom: 1rem; }
-details#profile, details#subscribe, details#admin {
+details#subscribe, details#admin {
   margin-top: 2rem;
   padding-top: .75rem;
   border-top: 1px solid var(--line);
@@ -223,6 +223,43 @@ details#profile, details#subscribe, details#admin {
   border-color: var(--bg);
   box-shadow: 0 0 0 2px var(--text);
 }
+
+/* Profil-Popup. Das <dialog> liegt in der Top-Layer, der Rest der Seite
+   wird vom ::backdrop abgedunkelt; Escape und Klick daneben schliessen. */
+#profile {
+  width: min(24rem, calc(100vw - 2rem));
+  max-height: 85vh;
+  padding: 1.1rem 1.2rem 1.4rem;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--card);
+  color: var(--text);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .35);
+  overflow: auto;
+}
+#profile::backdrop { background: rgba(0, 0, 0, .5); }
+
+.dialog-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: .4rem;
+}
+.dialog-head h2 { margin: 0; }
+
+button.icon {
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  font-size: 1.4rem;
+  line-height: 1;
+}
+button.icon:hover { background: var(--line); color: var(--text); }
 
 #profile .sub { margin-top: 1.4rem; padding-top: 1rem; border-top: 1px solid var(--line); }
 

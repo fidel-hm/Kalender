@@ -118,7 +118,8 @@ ist dauerhaft angemeldet und taucht bei allen Veranstaltungen mit seinem Namen a
 ## Profil, Farben und Zweitgerät
 
 Oben rechts steht ein Kreis mit dem eigenen Kürzel in der eigenen Farbe — ein Klick darauf
-öffnet **Mein Profil**. Dort lassen sich angezeigter Name und Farbe ändern. In dieser Farbe
+öffnet **Mein Profil** als Popup (ein natives `<dialog>`; Escape, der Schließknopf oder ein
+Klick daneben schließen es wieder). Dort lassen sich angezeigter Name und Farbe ändern. In dieser Farbe
 erscheint man bei allen anderen in den Veranstaltungen. Neu angelegte Personen bekommen
 reihum automatisch eine Farbe aus einer Palette von zwölf.
 
