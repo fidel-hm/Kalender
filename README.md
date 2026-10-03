@@ -4,6 +4,10 @@ Ein schlichter Veranstaltungskalender für eine feste Gruppe: jeder trägt Termi
 jeder antwortet pro Termin per Ampel (**rot / gelb / grün**), und jeder sieht, wer dabei ist.
 Dazu ein persönlicher Abo-Link für den Handy-Kalender.
 
+Adressen in den Notizen einer Veranstaltung werden automatisch anklickbar (`http://`,
+`https://` und `www.`); sie öffnen in einem neuen Tab. Verlinkt wird nur, was wirklich eine
+Web-Adresse ist — `javascript:` und `data:` bleiben unangetastet.
+
 Die Ampel ist absichtlich nur farbig und immer in derselben Reihenfolge — rot links,
 grün rechts. Wer wie geantwortet hat, steht in der Spalte direkt unter dem jeweiligen Knopf,
 die Zuordnung hängt also nicht allein an der Farbe. Vorlesesoftware bekommt die Bedeutung
@@ -113,9 +117,15 @@ ist dauerhaft angemeldet und taucht bei allen Veranstaltungen mit seinem Namen a
 
 ## Profil, Farben und Zweitgerät
 
-Unter **Mein Profil** kann jeder seinen angezeigten Namen und seine Farbe ändern. In dieser
-Farbe erscheint man bei allen anderen in den Veranstaltungen. Neu angelegte Personen bekommen
+Oben rechts steht ein Kreis mit dem eigenen Kürzel in der eigenen Farbe — ein Klick darauf
+öffnet **Mein Profil**. Dort lassen sich angezeigter Name und Farbe ändern. In dieser Farbe
+erscheint man bei allen anderen in den Veranstaltungen. Neu angelegte Personen bekommen
 reihum automatisch eine Farbe aus einer Palette von zwölf.
+
+Teilnehmer stehen bei den Veranstaltungen als runde Kürzel, nicht ausgeschrieben — sonst
+wird es in den drei schmalen Spalten zu eng. Das Kürzel ist normalerweise ein Buchstabe und
+wächst nur dann, wenn zwei Personen sonst nicht zu unterscheiden wären (Karla → „Ka",
+Konst → „Ko"). Der volle Name steckt im `title` und im `aria-label`.
 
 Im selben Bereich steht unter **Weiteres Gerät hinzufügen** der eigene Einladungslink noch
 einmal zum Kopieren — zum Anmelden auf Handy, Tablet oder in einem zweiten Browser. Es ist

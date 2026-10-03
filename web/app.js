@@ -18,13 +18,52 @@ function textOn(hex) {
   return luminance > 0.42 ? '#1c1b19' : '#ffffff';
 }
 
-/** Personen-Plakette in der jeweiligen Wunschfarbe. */
-function personChip(user) {
+/**
+ * Kuerzel fuer die Kreise: normalerweise ein Buchstabe. Waeren zwei Personen
+ * damit nicht unterscheidbar (Karla/Konst), waechst es so weit wie noetig.
+ */
+function shortNamesFor(users) {
+  const short = new Map();
+  for (const user of users) {
+    const name = (user.name || '?').trim() || '?';
+    let length = 1;
+    const collides = (len) => users.some((other) =>
+      other.id !== user.id &&
+      (other.name || '').trim().slice(0, len).toLowerCase() === name.slice(0, len).toLowerCase());
+    while (length < name.length && collides(length)) length++;
+    short.set(String(user.id), name.slice(0, length));
+  }
+  return short;
+}
+
+/** Runder Kreis mit Kuerzel in der Wunschfarbe der Person. */
+function avatar(user, extraClass = '') {
   const color = user.color || '#495057';
-  return `<span class="person" style="background:${color};color:${textOn(color)}">${escapeHtml(user.name)}</span>`;
+  const label = escapeHtml(user.name);
+  return `<span class="avatar ${extraClass}" style="background:${color};color:${textOn(color)}"` +
+    ` title="${label}" aria-label="${label}">${escapeHtml(shortNames.get(String(user.id)) || '?')}</span>`;
+}
+
+/** Adressen im Text anklickbar machen. Laeuft auf bereits maskiertem HTML. */
+function linkify(escapedText) {
+  return escapedText.replace(/\b(?:https?:\/\/|www\.)[^\s]+/gi, (match) => {
+    let address = match;
+    // Maskierte Anfuehrungs- und Klammerzeichen beenden die Adresse.
+    const stop = address.search(/&quot;|&#39;|&lt;|&gt;/);
+    if (stop > -1) address = address.slice(0, stop);
+    address = address.replace(/[.,;:!?]+$/, '');              // Satzzeichen am Satzende
+    const count = (char) => address.split(char).length - 1;
+    while (address.endsWith(')') && count(')') > count('(')) address = address.slice(0, -1);
+    if (!address) return match;
+
+    const href = address.startsWith('www.') ? `https://${address}` : address;
+    return `<a href="${href}" target="_blank" rel="noopener noreferrer">${address}</a>` +
+      match.slice(address.length);
+  });
 }
 let state = null;
 let showPast = false;
+let shortNames = new Map();
 
 // ------------------------------------------------------------------- Zeitzone
 
@@ -154,7 +193,7 @@ function renderEvents() {
       `<button class="s-${status}" data-status="${status}" aria-pressed="${mine === status}"` +
       ` title="${STATUS_LABEL[status]}" aria-label="${STATUS_LABEL[status]}"></button>`).join('');
     const columns = order.map((status) =>
-      `<div class="col">${groups[status].map(personChip).join('')}</div>`).join('');
+      `<div class="col">${groups[status].map((user) => avatar(user)).join('')}</div>`).join('');
     const nobody = order.every((status) => !groups[status].length);
 
     const canEdit = event.created_by === state.me.id || state.me.is_admin;
@@ -163,7 +202,7 @@ function renderEvents() {
       <div class="when">${escapeHtml(describeWhen(event))}</div>
       <div class="title">${escapeHtml(event.title)}</div>
       ${event.location ? `<div class="where">📍 ${escapeHtml(event.location)}</div>` : ''}
-      ${event.description ? `<div class="notes">${escapeHtml(event.description)}</div>` : ''}
+      ${event.description ? `<div class="notes">${linkify(escapeHtml(event.description))}</div>` : ''}
       <div class="rsvp">${buttons}${columns}</div>
       ${nobody ? '<div class="who muted">Noch hat niemand geantwortet.</div>' : ''}
       ${canEdit ? `<div class="event-admin">
@@ -189,9 +228,14 @@ function renderProfile() {
   // Der eigene Einladungslink ist das Token im Browser - kein API-Aufruf noetig.
   el('my-link').value = `${location.origin}${location.pathname}#t=${getToken()}`;
 
-  el('whoami').textContent = state.me.name;
-  el('whoami').style.background = state.me.color || 'transparent';
-  el('whoami').style.color = state.me.color ? textOn(state.me.color) : '';
+  const color = state.me.color || '#495057';
+  const me = el('whoami');
+  me.textContent = shortNames.get(String(state.me.id)) || state.me.name.slice(0, 1);
+  me.style.background = color;
+  me.style.color = textOn(color);
+  me.title = `${state.me.name} - Profil öffnen`;
+  me.setAttribute('aria-label', me.title);
+  me.hidden = false;
 }
 
 function renderSubscribe() {
@@ -207,7 +251,7 @@ async function renderAdmin() {
   const base = location.origin + location.pathname;
   el('users').innerHTML = users
     .map((user) => `<li data-id="${user.id}">
-        ${personChip(user)}${user.is_admin ? ' <span class="muted small">(Admin)</span>' : ''}
+        ${avatar(user)} <b>${escapeHtml(user.name)}</b>${user.is_admin ? ' <span class="muted small">(Admin)</span>' : ''}
         <div class="invite">
           <input readonly value="${escapeHtml(`${base}#t=${user.token}`)}">
           <button type="button" data-act="copy" class="ghost">Kopieren</button>
@@ -219,6 +263,7 @@ async function renderAdmin() {
 
 async function refresh() {
   state = await api('/api/state');
+  shortNames = shortNamesFor(state.users);
   renderProfile();
   renderEvents();
   renderSubscribe();
@@ -338,6 +383,11 @@ function copyField(input) {
   navigator.clipboard?.writeText(input.value);
   note('Link kopiert.');
 }
+
+el('whoami').addEventListener('click', () => {
+  el('profile').open = true;
+  el('profile').scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
 
 el('ics-copy').addEventListener('click', () => copyField(el('ics-url')));
 el('my-link-copy').addEventListener('click', () => copyField(el('my-link')));

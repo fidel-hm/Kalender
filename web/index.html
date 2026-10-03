@@ -12,7 +12,7 @@
 
 <header>
   <h1>Kalender</h1>
-  <div id="whoami" class="muted"></div>
+  <button type="button" id="whoami" hidden></button>
 </header>
 
 <main>
@@ -25,7 +25,7 @@
 
   <section id="app" hidden>
     <details id="new-event">
-      <summary class="button">+ Veranstaltung</summary>
+      <summary class="button">+ Neu</summary>
       <form id="event-form">
         <input type="hidden" name="id">
         <label>Was? <input name="title" maxlength="200" required placeholder="Konzert, Bar, Wandern …"></label>

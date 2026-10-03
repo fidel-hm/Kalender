@@ -129,7 +129,8 @@ details#profile, details#subscribe, details#admin {
 .event .when { font-size: .85rem; color: var(--muted); }
 .event .title { font-weight: 600; margin: .15rem 0; }
 .event .where, .event .notes { font-size: .9rem; }
-.event .notes { white-space: pre-wrap; margin-top: .3rem; }
+.event .notes { white-space: pre-wrap; margin-top: .3rem; overflow-wrap: anywhere; }
+.event .notes a { color: var(--accent); }
 
 /* Ampel: feste Reihenfolge rot - gelb - gruen. Darunter in derselben Spalte,
    wer das jeweils gewaehlt hat; die Spalte traegt also die Bedeutung mit. */
@@ -166,8 +167,8 @@ details#profile, details#subscribe, details#admin {
 
 .rsvp .col {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  flex-wrap: wrap;
+  align-content: flex-start;
   gap: .25rem;
   min-height: .5rem;
   padding: .3rem;
@@ -178,25 +179,36 @@ details#profile, details#subscribe, details#admin {
 .rsvp .col:nth-of-type(2) { --c: var(--maybe); }
 .rsvp .col:nth-of-type(3) { --c: var(--yes); }
 
-.person {
-  display: inline-block;
-  max-width: 100%;
-  padding: .1rem .45rem;
-  border-radius: 999px;
-  font-size: .78rem;
-  line-height: 1.45;
-  overflow-wrap: anywhere;
+/* Teilnehmer als Kreis mit Kuerzel - spart Platz in den schmalen Spalten. */
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  font-size: .72rem;
+  font-weight: 600;
+  flex: 0 0 auto;
 }
 
 .who { font-size: .85rem; margin-top: .4rem; }
 
 /* ------------------------------------------------------------------- Profil */
 
+/* Kreis oben rechts: Kuerzel statt Name, oeffnet das Profil. */
 #whoami {
-  padding: .1rem .5rem;
-  border-radius: 999px;
-  font-size: .85rem;
+  width: 2.6rem;
+  height: 2.6rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  font-size: .95rem;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
 }
+#whoami:hover { filter: brightness(1.12); }
 
 .palette { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .8rem; }
 .swatch {
@@ -227,9 +239,11 @@ details#profile, details#subscribe, details#admin {
 
 #users { list-style: none; padding: 0; }
 #users li {
+  display: flow-root;
   padding: .6rem 0;
   border-bottom: 1px solid var(--line);
 }
+#users li .avatar { vertical-align: middle; margin-right: .2rem; }
 #users .invite { display: flex; gap: .5rem; margin-top: .35rem; }
 #users .invite input { font-size: .8rem; }
 
