@@ -103,10 +103,18 @@ const fmtDay = fmt({ weekday: 'short', day: 'numeric', month: 'long' });
 const fmtTime = fmt({ hour: '2-digit', minute: '2-digit' });
 const fmtMonth = fmt({ month: 'long', year: 'numeric' });
 
+/** 23:59 des Kalendertags (Berliner Zeit), an dem der Termin beginnt. */
+function endeDesTages(iso) {
+  const teile = {};
+  for (const { type, value } of ZONE_PARTS.formatToParts(new Date(iso))) teile[type] = value;
+  return inputToUtc(`${teile.year}-${teile.month}-${teile.day}T23:59`);
+}
+
 /** Zeitpunkt, an dem die Veranstaltung vorbei ist (für "vergangen" und Sortierung). */
 function endOf(event) {
   if (event.all_day) return Date.parse(`${(event.ends_at || event.starts_at)}T23:59:59Z`);
-  return event.ends_at ? Date.parse(event.ends_at) : Date.parse(event.starts_at) + 2 * 3600e3;
+  // Ohne Endzeit laeuft der Termin bis zum Ende seines Tages, nicht nur zwei Stunden.
+  return Date.parse(event.ends_at || endeDesTages(event.starts_at));
 }
 
 function describeWhen(event) {

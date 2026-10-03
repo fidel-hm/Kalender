@@ -207,6 +207,8 @@ Alle `/api/`-Endpunkte erwarten `Authorization: Bearer <token>`.
 | `GET` | `/ics/<ics_token>.ics` | ICS-Feed, ohne Header-Anmeldung |
 
 Zeitpunkte: ganztägige Termine als `YYYY-MM-DD`, sonst als UTC (`YYYY-MM-DDTHH:MM:SSZ`).
+Ein Termin ohne Endzeit läuft bis 23:59 seines Kalendertags (Berliner Zeit), statt eine Dauer
+zu erfinden. Er bleibt damit auch auf der Seite den ganzen Tag über sichtbar.
 Die Oberfläche rechnet durchgehend in Europe/Berlin um, auch über die Zeitumstellung hinweg.
 
 ---

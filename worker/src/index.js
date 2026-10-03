@@ -13,7 +13,7 @@ const PALETTE = [
   '#f08c00', '#099268', '#9c36b5', '#e03131', '#846358', '#495057',
 ];
 const COLOR_RE = /^#[0-9a-f]{6}$/;
-const DEFAULT_DURATION_MS = 2 * 60 * 60 * 1000; // 2h, falls kein Ende angegeben
+const ZONE = 'Europe/Berlin';
 
 // ---------------------------------------------------------------- Hilfsmittel
 
@@ -62,6 +62,37 @@ async function readJson(request) {
 }
 
 const nowUtc = () => new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
+
+const ZONE_PARTS = new Intl.DateTimeFormat('en-CA', {
+  timeZone: ZONE, year: 'numeric', month: '2-digit', day: '2-digit',
+  hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+});
+
+const zonenTeile = (date) => {
+  const teile = {};
+  for (const { type, value } of ZONE_PARTS.formatToParts(date)) teile[type] = value;
+  return teile;
+};
+
+/** Abstand der Zone zu UTC in Millisekunden, zum Zeitpunkt `date`. */
+function zonenVersatz(date) {
+  const t = zonenTeile(date);
+  const alsUtc = Date.UTC(+t.year, +t.month - 1, +t.day, +t.hour % 24, +t.minute, +t.second);
+  return alsUtc - date.getTime();
+}
+
+/**
+ * 23:59 des Kalendertags (Berliner Zeit), an dem der Termin beginnt.
+ * Termine ohne Endzeit laufen bis dahin, statt eine Dauer zu erfinden.
+ */
+function endeDesTages(startIso) {
+  const t = zonenTeile(new Date(startIso));
+  const naiv = Date.UTC(+t.year, +t.month - 1, +t.day, 23, 59, 0);
+  // Zwei Durchlaeufe, damit die Zeitumstellung korrekt getroffen wird.
+  let wert = naiv;
+  for (let i = 0; i < 2; i++) wert = naiv - zonenVersatz(new Date(wert));
+  return new Date(wert).toISOString().replace(/\.\d{3}Z$/, 'Z');
+}
 
 // ------------------------------------------------------------------- Routing
 
@@ -446,7 +477,12 @@ async function icsFeed(icsToken, url, env) {
       // DTEND ist bei Tagesterminen exklusiv → letzter Tag + 1.
       lines.push(`DTEND;VALUE=DATE:${compactDate(addDays(e.ends_at || e.starts_at, 1))}`);
     } else {
-      const end = e.ends_at || new Date(Date.parse(e.starts_at) + DEFAULT_DURATION_MS).toISOString();
+      let end = e.ends_at || endeDesTages(e.starts_at);
+      // Beginnt der Termin erst kurz vor Mitternacht, waere das Tagesende nicht
+      // mehr danach. Dann lieber eine Stunde ansetzen als ein kaputtes DTEND.
+      if (Date.parse(end) <= Date.parse(e.starts_at)) {
+        end = new Date(Date.parse(e.starts_at) + 3600000).toISOString();
+      }
       lines.push(`DTSTART:${icsStamp(new Date(e.starts_at))}`);
       lines.push(`DTEND:${icsStamp(new Date(end))}`);
     }
