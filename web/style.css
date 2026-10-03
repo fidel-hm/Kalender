@@ -9,6 +9,7 @@
   --maybe: #e8a700;
   --no: #c23b3b;
   --radius: 10px;
+  --dot-idle: .28;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -18,6 +19,7 @@
     --text: #e9e8e5;
     --muted: #9b9892;
     --line: #34363a;
+    --dot-idle: .45;
     --accent: #7a93f5;
     --yes: #5fc777;
     --maybe: #e3b341;
@@ -98,7 +100,7 @@ summary.button { list-style: none; width: 100%; text-align: center; margin-botto
 summary.button::-webkit-details-marker { display: none; }
 
 details#new-event[open] summary.button { margin-bottom: 1rem; }
-details#subscribe, details#admin {
+details#profile, details#subscribe, details#admin {
   margin-top: 2rem;
   padding-top: .75rem;
   border-top: 1px solid var(--line);
@@ -129,26 +131,88 @@ details#subscribe, details#admin {
 .event .where, .event .notes { font-size: .9rem; }
 .event .notes { white-space: pre-wrap; margin-top: .3rem; }
 
-.rsvp { display: flex; gap: .4rem; margin: .7rem 0 .5rem; flex-wrap: wrap; }
+/* Ampel: feste Reihenfolge rot - gelb - gruen. Darunter in derselben Spalte,
+   wer das jeweils gewaehlt hat; die Spalte traegt also die Bedeutung mit. */
+.rsvp {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: .4rem;
+  margin: .7rem 0 .2rem;
+}
 .rsvp button {
-  flex: 1 1 6rem;
-  padding: .4rem .5rem;
-  font-size: .85rem;
+  height: 2.3rem;
   background: var(--card);
   border-color: var(--line);
-  color: var(--muted);
 }
-.rsvp button[aria-pressed="true"] { color: #fff; border-color: transparent; }
-.rsvp button[data-status="yes"][aria-pressed="true"]   { background: var(--yes); }
-.rsvp button[data-status="maybe"][aria-pressed="true"] { background: var(--maybe); color: #1c1b19; }
-.rsvp button[data-status="no"][aria-pressed="true"]    { background: var(--no); }
+.rsvp button::before {
+  content: '';
+  display: block;
+  width: 1.15rem;
+  height: 1.15rem;
+  margin: 0 auto;
+  border-radius: 50%;
+  background: var(--c);
+  opacity: var(--dot-idle);
+}
+.rsvp button:hover::before { opacity: .75; }
+.rsvp button[aria-pressed="true"] {
+  border-color: var(--c);
+  box-shadow: inset 0 0 0 1px var(--c);
+}
+.rsvp button[aria-pressed="true"]::before { opacity: 1; }
+.rsvp .s-no    { --c: var(--no); }
+.rsvp .s-maybe { --c: var(--maybe); }
+.rsvp .s-yes   { --c: var(--yes); }
 
-.who { font-size: .85rem; color: var(--muted); }
-.who div { margin-top: .15rem; }
-.who b { font-weight: 600; }
-.who .k-yes b   { color: var(--yes); }
-.who .k-maybe b { color: var(--maybe); }
-.who .k-no b    { color: var(--no); }
+.rsvp .col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: .25rem;
+  min-height: .5rem;
+  padding: .3rem;
+  border-radius: 0 0 var(--radius) var(--radius);
+  background: color-mix(in srgb, var(--c) 12%, transparent);
+}
+.rsvp .col:nth-of-type(1) { --c: var(--no); }
+.rsvp .col:nth-of-type(2) { --c: var(--maybe); }
+.rsvp .col:nth-of-type(3) { --c: var(--yes); }
+
+.person {
+  display: inline-block;
+  max-width: 100%;
+  padding: .1rem .45rem;
+  border-radius: 999px;
+  font-size: .78rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.who { font-size: .85rem; margin-top: .4rem; }
+
+/* ------------------------------------------------------------------- Profil */
+
+#whoami {
+  padding: .1rem .5rem;
+  border-radius: 999px;
+  font-size: .85rem;
+}
+
+.palette { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .8rem; }
+.swatch {
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  box-shadow: 0 0 0 1px var(--line);
+}
+.swatch[aria-pressed="true"] {
+  border-color: var(--bg);
+  box-shadow: 0 0 0 2px var(--text);
+}
+
+#profile .sub { margin-top: 1.4rem; padding-top: 1rem; border-top: 1px solid var(--line); }
 
 .event-admin { margin-top: .5rem; display: flex; gap: .75rem; font-size: .85rem; }
 .event-admin button {

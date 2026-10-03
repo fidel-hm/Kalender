@@ -3,6 +3,7 @@
 CREATE TABLE IF NOT EXISTS users (
   id         INTEGER PRIMARY KEY AUTOINCREMENT,
   name       TEXT    NOT NULL,
+  color      TEXT    NOT NULL DEFAULT '#1971c2',  -- Anzeigefarbe der Person
   token      TEXT    NOT NULL UNIQUE,  -- steckt im Einladungslink, gilt unbegrenzt
   ics_token  TEXT    NOT NULL UNIQUE,  -- geheimer Teil der persönlichen Abo-URL
   is_admin   INTEGER NOT NULL DEFAULT 0,

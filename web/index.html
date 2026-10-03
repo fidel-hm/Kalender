@@ -48,6 +48,23 @@
 
     <p id="show-past-wrap"><button type="button" id="show-past" class="ghost">Vergangene anzeigen</button></p>
 
+    <details id="profile">
+      <summary>Mein Profil</summary>
+      <form id="profile-form">
+        <label>Dein Name <input name="name" maxlength="60" required></label>
+        <p class="muted small">Farbe, in der dich die anderen sehen:</p>
+        <div id="palette" class="palette"></div>
+        <div class="row actions"><button type="submit">Speichern</button></div>
+        <p class="error" id="profile-error" hidden></p>
+      </form>
+
+      <p class="sub"><b>Weiteres Gerät hinzufügen</b></p>
+      <p class="muted small">Diesen Link auf dem anderen Gerät öffnen — Handy, Tablet, zweiter
+         Browser. Du bist dort sofort als dieselbe Person angemeldet.
+         Nicht weitergeben: wer ihn hat, ist du.</p>
+      <p><input id="my-link" readonly> <button type="button" id="my-link-copy" class="ghost">Kopieren</button></p>
+    </details>
+
     <details id="subscribe">
       <summary>Kalender abonnieren</summary>
       <p class="muted">Dein persönlicher Abo-Link. Er enthält alle Veranstaltungen, bei denen du

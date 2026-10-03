@@ -1,8 +1,13 @@
 # Freundeskalender
 
 Ein schlichter Veranstaltungskalender für eine feste Gruppe: jeder trägt Termine ein,
-jeder antwortet pro Termin mit **Nicht dabei / Interessiert / Auf jeden Fall**, und jeder
-sieht, wer dabei ist. Dazu ein persönlicher Abo-Link für den Handy-Kalender.
+jeder antwortet pro Termin per Ampel (**rot / gelb / grün**), und jeder sieht, wer dabei ist.
+Dazu ein persönlicher Abo-Link für den Handy-Kalender.
+
+Die Ampel ist absichtlich nur farbig und immer in derselben Reihenfolge — rot links,
+grün rechts. Wer wie geantwortet hat, steht in der Spalte direkt unter dem jeweiligen Knopf,
+die Zuordnung hängt also nicht allein an der Farbe. Vorlesesoftware bekommt die Bedeutung
+über `aria-label`.
 
 - **Frontend**: statische Seite auf GitHub Pages (`web/`) — kein Build-Schritt, kein Framework.
 - **Backend**: ein Cloudflare Worker mit D1-Datenbank (`worker/`) — liefert API und ICS-Feed.
@@ -40,6 +45,14 @@ anstelle von `HIER_DIE_DATABASE_ID_EINTRAGEN` einsetzen. Dann:
 ```bash
 npm run db:init             # legt die Tabellen an
 npm run deploy              # gibt die Worker-URL aus, z.B. https://kalender.DEINNAME.workers.dev
+```
+
+Bei einer **bereits bestehenden** Datenbank legt `db:init` keine neuen Spalten an
+(`CREATE TABLE IF NOT EXISTS`). Dafür gibt es `worker/migrations/` — jede Datei einmal
+anwenden, zum Beispiel:
+
+```bash
+npx wrangler d1 execute kalender --remote --file migrations/0001_personenfarbe.sql
 ```
 
 ### 2. Dich selbst als Admin anlegen
@@ -98,6 +111,16 @@ ist dauerhaft angemeldet und taucht bei allen Veranstaltungen mit seinem Namen a
 
 ---
 
+## Profil, Farben und Zweitgerät
+
+Unter **Mein Profil** kann jeder seinen angezeigten Namen und seine Farbe ändern. In dieser
+Farbe erscheint man bei allen anderen in den Veranstaltungen. Neu angelegte Personen bekommen
+reihum automatisch eine Farbe aus einer Palette von zwölf.
+
+Im selben Bereich steht unter **Weiteres Gerät hinzufügen** der eigene Einladungslink noch
+einmal zum Kopieren — zum Anmelden auf Handy, Tablet oder in einem zweiten Browser. Es ist
+derselbe Link wie bei der Einladung; er gilt unbegrenzt und für beliebig viele Geräte.
+
 ## Kalender abonnieren
 
 Unter **Kalender abonnieren** findet jeder seinen persönlichen Link.
@@ -140,7 +163,8 @@ Alle `/api/`-Endpunkte erwarten `Authorization: Bearer <token>`.
 
 | Methode | Pfad | Zweck |
 |---|---|---|
-| `GET` | `/api/state` | Alles auf einmal: eigenes Profil, Personen, Veranstaltungen, Antworten, Abo-URL |
+| `GET` | `/api/state` | Alles auf einmal: eigenes Profil, Personen, Veranstaltungen, Antworten, Abo-URL, Farbpalette |
+| `PATCH` | `/api/me` | Eigenen Namen und/oder Anzeigefarbe ändern: `{"name":"…","color":"#1971c2"}` |
 | `POST` | `/api/events` | Veranstaltung anlegen |
 | `PATCH` | `/api/events/:id` | Ändern (nur Ersteller oder Admin) |
 | `DELETE` | `/api/events/:id` | Löschen (nur Ersteller oder Admin) |
@@ -173,9 +197,13 @@ cd web && python3 -m http.server 8080
 Dafür in `web/config.js` kurzzeitig `http://127.0.0.1:8787` eintragen und
 `http://127.0.0.1:8080/index.html#t=testtoken1234567890abcd` öffnen.
 
-Der lokale `wrangler dev` liest `ALLOWED_ORIGIN` aus `wrangler.toml` und erlaubt damit nur
-die Pages-Adresse. Für lokales Arbeiten dort vorübergehend `"*"` oder
-`"http://127.0.0.1:8080"` eintragen — aber **nicht in diesem Zustand deployen**.
+Der lokale `wrangler dev` würde `ALLOWED_ORIGIN` aus `wrangler.toml` lesen und damit nur die
+Pages-Adresse erlauben. Lege stattdessen `worker/.dev.vars` an — die Datei gilt nur für
+`wrangler dev`, wird nie deployt und ist über `.gitignore` ausgeschlossen:
+
+```
+ALLOWED_ORIGIN = "*"
+```
 
 > Läuft etwas nicht, ist fast immer die Node-Version schuld: `node --version` muss 22+
 > zeigen. Wrangler bricht sonst mit einem klaren Hinweis ab.

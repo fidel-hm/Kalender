@@ -6,6 +6,23 @@ const ZONE = 'Europe/Berlin'; // Alle Zeiten sind Berliner Zeit, egal wo man ger
 const STATUS_LABEL = { yes: 'Auf jeden Fall', maybe: 'Interessiert', no: 'Nicht dabei' };
 
 const el = (id) => document.getElementById(id);
+
+/** Schwarze oder weisse Schrift - je nachdem, was auf der Farbe besser lesbar ist. */
+function textOn(hex) {
+  const value = parseInt(hex.slice(1), 16);
+  const channels = [(value >> 16) & 255, (value >> 8) & 255, value & 255].map((c) => {
+    const s = c / 255;
+    return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+  });
+  const luminance = 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+  return luminance > 0.42 ? '#1c1b19' : '#ffffff';
+}
+
+/** Personen-Plakette in der jeweiligen Wunschfarbe. */
+function personChip(user) {
+  const color = user.color || '#495057';
+  return `<span class="person" style="background:${color};color:${textOn(color)}">${escapeHtml(user.name)}</span>`;
+}
 let state = null;
 let showPast = false;
 
@@ -112,7 +129,7 @@ function renderEvents() {
     return;
   }
 
-  const nameOf = new Map(state.users.map((u) => [String(u.id), u.name]));
+  const nameOf = new Map(state.users.map((u) => [String(u.id), u]));
   let html = '';
   let currentMonth = null;
 
@@ -124,16 +141,21 @@ function renderEvents() {
     }
 
     const mine = event.rsvps[String(state.me.id)] || '';
-    const groups = { yes: [], maybe: [], no: [] };
+    const groups = { no: [], maybe: [], yes: [] };
     for (const [userId, status] of Object.entries(event.rsvps)) {
-      if (groups[status]) groups[status].push(nameOf.get(userId) || '?');
+      const user = nameOf.get(userId);
+      if (groups[status] && user) groups[status].push(user);
     }
+    for (const list of Object.values(groups)) list.sort((a, b) => a.name.localeCompare(b.name, 'de'));
 
-    const who = ['yes', 'maybe', 'no']
-      .filter((status) => groups[status].length)
-      .map((status) =>
-        `<div class="k-${status}"><b>${STATUS_LABEL[status]}:</b> ${escapeHtml(groups[status].sort().join(', '))}</div>`)
-      .join('');
+    // Ampel-Reihenfolge: rot, gelb, gruen - immer gleich, damit die Position die Bedeutung traegt.
+    const order = ['no', 'maybe', 'yes'];
+    const buttons = order.map((status) =>
+      `<button class="s-${status}" data-status="${status}" aria-pressed="${mine === status}"` +
+      ` title="${STATUS_LABEL[status]}" aria-label="${STATUS_LABEL[status]}"></button>`).join('');
+    const columns = order.map((status) =>
+      `<div class="col">${groups[status].map(personChip).join('')}</div>`).join('');
+    const nobody = order.every((status) => !groups[status].length);
 
     const canEdit = event.created_by === state.me.id || state.me.is_admin;
 
@@ -142,11 +164,8 @@ function renderEvents() {
       <div class="title">${escapeHtml(event.title)}</div>
       ${event.location ? `<div class="where">📍 ${escapeHtml(event.location)}</div>` : ''}
       ${event.description ? `<div class="notes">${escapeHtml(event.description)}</div>` : ''}
-      <div class="rsvp">
-        ${['no', 'maybe', 'yes'].map((status) =>
-          `<button data-status="${status}" aria-pressed="${mine === status}">${STATUS_LABEL[status]}</button>`).join('')}
-      </div>
-      <div class="who">${who || 'Noch hat niemand geantwortet.'}</div>
+      <div class="rsvp">${buttons}${columns}</div>
+      ${nobody ? '<div class="who muted">Noch hat niemand geantwortet.</div>' : ''}
       ${canEdit ? `<div class="event-admin">
         <button data-act="edit">Bearbeiten</button>
         <button data-act="delete">Löschen</button>
@@ -154,6 +173,25 @@ function renderEvents() {
     </article>`;
   }
   container.innerHTML = html;
+}
+
+function renderProfile() {
+  el('profile-form').elements.name.value = state.me.name;
+
+  const palette = state.palette || [];
+  const chosen = (state.me.color || '').toLowerCase();
+  el('palette').innerHTML = palette
+    .map((color) => `<button type="button" class="swatch" data-color="${color}"` +
+      ` style="background:${color}" aria-pressed="${color === chosen}"` +
+      ` title="${color}" aria-label="Farbe ${color}"></button>`)
+    .join('');
+
+  // Der eigene Einladungslink ist das Token im Browser - kein API-Aufruf noetig.
+  el('my-link').value = `${location.origin}${location.pathname}#t=${getToken()}`;
+
+  el('whoami').textContent = state.me.name;
+  el('whoami').style.background = state.me.color || 'transparent';
+  el('whoami').style.color = state.me.color ? textOn(state.me.color) : '';
 }
 
 function renderSubscribe() {
@@ -169,7 +207,7 @@ async function renderAdmin() {
   const base = location.origin + location.pathname;
   el('users').innerHTML = users
     .map((user) => `<li data-id="${user.id}">
-        <b>${escapeHtml(user.name)}</b>${user.is_admin ? ' <span class="muted small">(Admin)</span>' : ''}
+        ${personChip(user)}${user.is_admin ? ' <span class="muted small">(Admin)</span>' : ''}
         <div class="invite">
           <input readonly value="${escapeHtml(`${base}#t=${user.token}`)}">
           <button type="button" data-act="copy" class="ghost">Kopieren</button>
@@ -181,7 +219,7 @@ async function renderAdmin() {
 
 async function refresh() {
   state = await api('/api/state');
-  el('whoami').textContent = state.me.name;
+  renderProfile();
   renderEvents();
   renderSubscribe();
   await renderAdmin();
@@ -302,6 +340,48 @@ function copyField(input) {
 }
 
 el('ics-copy').addEventListener('click', () => copyField(el('ics-url')));
+el('my-link-copy').addEventListener('click', () => copyField(el('my-link')));
+
+// Farbwahl wirkt sofort in der Vorschau; gespeichert wird erst beim Absenden.
+el('palette').addEventListener('click', (clickEvent) => {
+  const swatch = clickEvent.target.closest('.swatch');
+  if (!swatch) return;
+  for (const other of el('palette').children) {
+    other.setAttribute('aria-pressed', String(other === swatch));
+  }
+  el('whoami').style.background = swatch.dataset.color;
+  el('whoami').style.color = textOn(swatch.dataset.color);
+});
+
+// Zuklappen ohne Speichern verwirft die Vorschau wieder.
+el('profile').addEventListener('toggle', () => {
+  if (!el('profile').open) {
+    el('profile-error').hidden = true;
+    renderProfile();
+  }
+});
+
+el('profile-form').addEventListener('submit', async (submitEvent) => {
+  submitEvent.preventDefault();
+  const errorBox = el('profile-error');
+  errorBox.hidden = true;
+  const picked = el('palette').querySelector('[aria-pressed="true"]');
+  try {
+    await api('/api/me', {
+      method: 'PATCH',
+      body: JSON.stringify({
+        name: submitEvent.target.elements.name.value,
+        color: picked ? picked.dataset.color : state.me.color,
+      }),
+    });
+    await refresh();
+    el('profile').open = false;
+    note('Profil gespeichert.');
+  } catch (err) {
+    errorBox.textContent = err.message;
+    errorBox.hidden = false;
+  }
+});
 
 el('user-form').addEventListener('submit', async (submitEvent) => {
   submitEvent.preventDefault();

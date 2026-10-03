@@ -7,6 +7,12 @@
  */
 
 const STATUSES = ['yes', 'maybe', 'no'];
+/** Anzeigefarben der Personen; neu angelegte Personen bekommen reihum die naechste. */
+const PALETTE = [
+  '#1971c2', '#2f9e44', '#e8590c', '#6741d9', '#0c8599', '#c2255c',
+  '#f08c00', '#099268', '#9c36b5', '#e03131', '#846358', '#495057',
+];
+const COLOR_RE = /^#[0-9a-f]{6}$/;
 const DEFAULT_DURATION_MS = 2 * 60 * 60 * 1000; // 2h, falls kein Ende angegeben
 
 // ---------------------------------------------------------------- Hilfsmittel
@@ -92,6 +98,7 @@ async function handleApi(request, url, path, env) {
   const method = request.method;
 
   if (path === '/api/state' && method === 'GET') return getState(me, url, env);
+  if (path === '/api/me' && method === 'PATCH') return updateMe(request, me, env);
 
   if (path === '/api/events' && method === 'POST') return createEvent(request, me, env);
 
@@ -132,7 +139,7 @@ async function authenticate(request, env) {
   if (!token) bad(401, 'Kein Token mitgeschickt');
 
   const user = await env.DB.prepare(
-    'SELECT id, name, ics_token, is_admin FROM users WHERE token = ?'
+    'SELECT id, name, color, ics_token, is_admin FROM users WHERE token = ?'
   )
     .bind(token)
     .first();
@@ -151,7 +158,7 @@ async function getState(me, url, env) {
   const since = new Date(Date.now() - 180 * 86400000).toISOString().slice(0, 10);
 
   const [users, events, rsvps] = await Promise.all([
-    env.DB.prepare('SELECT id, name FROM users ORDER BY name COLLATE NOCASE').all(),
+    env.DB.prepare('SELECT id, name, color FROM users ORDER BY name COLLATE NOCASE').all(),
     env.DB.prepare(
       'SELECT id, title, starts_at, ends_at, all_day, location, description, created_by' +
         ' FROM events WHERE COALESCE(ends_at, starts_at) >= ? ORDER BY starts_at'
@@ -174,7 +181,8 @@ async function getState(me, url, env) {
 
   return json(
     {
-      me: { id: me.id, name: me.name, is_admin: !!me.is_admin },
+      me: { id: me.id, name: me.name, color: me.color, is_admin: !!me.is_admin },
+      palette: PALETTE,
       ics_url: `${url.origin}/ics/${me.ics_token}.ics`,
       users: users.results,
       events: events.results.map((e) => ({
@@ -186,6 +194,34 @@ async function getState(me, url, env) {
     200,
     env
   );
+}
+
+// ------------------------------------------------------------ Eigenes Profil
+
+/** Name und Anzeigefarbe aendern. Jeder darf nur sich selbst bearbeiten. */
+async function updateMe(request, me, env) {
+  const body = await readJson(request);
+  const updates = {};
+
+  if (body.name !== undefined) {
+    const name = String(body.name).trim();
+    if (!name) bad(400, 'Der Name darf nicht leer sein');
+    if (name.length > 60) bad(400, 'Name ist zu lang (max. 60 Zeichen)');
+    updates.name = name;
+  }
+  if (body.color !== undefined) {
+    const color = String(body.color).toLowerCase();
+    if (!COLOR_RE.test(color)) bad(400, 'Die Farbe muss ein Hex-Wert wie #1971c2 sein');
+    updates.color = color;
+  }
+
+  const fields = Object.keys(updates); // feste Whitelist, daher unbedenklich im SQL
+  if (!fields.length) bad(400, 'Es wurde nichts zum Ändern mitgeschickt');
+
+  await env.DB.prepare(`UPDATE users SET ${fields.map((f) => `${f} = ?`).join(', ')} WHERE id = ?`)
+    .bind(...fields.map((f) => updates[f]), me.id)
+    .run();
+  return json({ ok: true, ...updates }, 200, env);
 }
 
 // ----------------------------------------------------------- Events schreiben
@@ -297,7 +333,7 @@ async function clearRsvp(eventId, me, env) {
 async function listUsers(me, env) {
   requireAdmin(me);
   const { results } = await env.DB.prepare(
-    'SELECT id, name, token, is_admin, created_at FROM users ORDER BY name COLLATE NOCASE'
+    'SELECT id, name, color, token, is_admin, created_at FROM users ORDER BY name COLLATE NOCASE'
   ).all();
   return json({ users: results.map((u) => ({ ...u, is_admin: !!u.is_admin })) }, 200, env);
 }
@@ -310,12 +346,14 @@ async function createUser(request, me, env) {
   if (name.length > 60) bad(400, 'Name ist zu lang (max. 60 Zeichen)');
 
   const token = randomToken();
+  const { n } = await env.DB.prepare('SELECT COUNT(*) AS n FROM users').first();
+  const color = PALETTE[n % PALETTE.length];
   const row = await env.DB.prepare(
-    'INSERT INTO users (name, token, ics_token, is_admin) VALUES (?, ?, ?, ?) RETURNING id'
+    'INSERT INTO users (name, color, token, ics_token, is_admin) VALUES (?, ?, ?, ?, ?) RETURNING id'
   )
-    .bind(name, token, randomToken(), body.is_admin ? 1 : 0)
+    .bind(name, color, token, randomToken(), body.is_admin ? 1 : 0)
     .first();
-  return json({ id: row.id, name, token }, 201, env);
+  return json({ id: row.id, name, color, token }, 201, env);
 }
 
 async function deleteUser(id, me, env) {
