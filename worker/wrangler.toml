@@ -1,0 +1,16 @@
+name = "kalender"
+main = "src/index.js"
+compatibility_date = "2024-09-23"
+
+[vars]
+# Name, der in der Kalender-App des Handys angezeigt wird.
+CALENDAR_NAME = "Freundeskalender"
+# Nach dem Pages-Deploy auf die eigene Domain einschraenken, z.B.
+# ALLOWED_ORIGIN = "https://deinname.github.io"
+ALLOWED_ORIGIN = "*"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "kalender"
+# Wird von "wrangler d1 create kalender" ausgegeben und hier eingetragen:
+database_id = "dd7abcf2-9f0b-4a80-b2a9-ac3763485e4b"
