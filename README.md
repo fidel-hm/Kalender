@@ -132,6 +132,24 @@ Im selben Popup stecken auch der **Abo-Link für den Handy-Kalender** und unter
 **Weiteres Gerät hinzufügen** der eigene Einladungslink noch einmal zum Kopieren, zum Anmelden auf Handy, Tablet oder in einem zweiten Browser. Es ist
 derselbe Link wie bei der Einladung; er gilt unbegrenzt und für beliebig viele Geräte.
 
+## Als App auf den Startbildschirm
+
+Die Seite bringt ein Web-App-Manifest und eigene Icons mit. Über Safari lässt sie sich damit
+als App auf den Startbildschirm legen, mit eigenem Symbol und ohne Adressleiste. Die Anleitung
+dazu steht im Profil-Popup unter **Als App hinzufügen**.
+
+Safari bietet keine Schnittstelle, um das per Knopfdruck auszulösen; der Weg führt zwingend
+über das Teilen-Menü. Deshalb steht dort eine Anleitung statt eines Knopfes.
+
+**Wichtig:** iOS gibt einer Web-App ihren eigenen Speicher, getrennt von Safari. Die Anmeldung
+aus Safari gilt in der App also nicht mit. Der erste Schritt der Anleitung kopiert deshalb den
+Einladungslink; in der App wird er einmal auf der Startseite eingefügt, danach bleibt die App
+dauerhaft angemeldet.
+
+Einen Service Worker gibt es bewusst nicht. Gebraucht würde er nur für den
+Installationsdialog von Chrome, und ohne ihn kann die App nie auf veralteten Dateien sitzen
+bleiben.
+
 ## Kalender abonnieren
 
 Im Profil-Popup (Kreis oben rechts) findet jeder unter **Kalender abonnieren** seinen

@@ -238,6 +238,19 @@ function renderProfile() {
   me.hidden = false;
 }
 
+/** Laeuft die Seite bereits als installierte App? */
+const alsAppGeoeffnet = () =>
+  matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+
+/*
+ * Safari bietet keine Schnittstelle zum Installieren, deshalb steht hier eine
+ * Anleitung statt eines Knopfes. Ein Knopf waere an dieser Stelle eine Attrappe.
+ */
+function renderInstall() {
+  el('install-box').hidden = alsAppGeoeffnet();
+  el('install-done').hidden = !alsAppGeoeffnet();
+}
+
 function renderSubscribe() {
   const url = state.ics_url;
   el('ics-url').value = url;
@@ -267,6 +280,7 @@ async function refresh() {
   renderProfile();
   renderEvents();
   renderSubscribe();
+  renderInstall();
   await renderAdmin();
 }
 
@@ -394,6 +408,7 @@ el('profile').addEventListener('click', (clickEvent) => {
 
 el('ics-copy').addEventListener('click', () => copyField(el('ics-url')));
 el('my-link-copy').addEventListener('click', () => copyField(el('my-link')));
+el('install-copy').addEventListener('click', () => copyField(el('my-link')));
 
 // Farbwahl wirkt sofort in der Vorschau; gespeichert wird erst beim Absenden.
 el('palette').addEventListener('click', (clickEvent) => {
@@ -475,6 +490,23 @@ el('users').addEventListener('click', async (clickEvent) => {
 
 // ---------------------------------------------------------------------- Start
 
+// Auf der Schranke laesst sich der Einladungslink auch einfuegen. Das hilft,
+// wenn die installierte App einen eigenen Speicher hat und das Token dort fehlt.
+el('gate-form').addEventListener('submit', (submitEvent) => {
+  submitEvent.preventDefault();
+  const eingabe = submitEvent.target.elements.link.value.trim();
+  const fehler = el('gate-error');
+  const treffer = eingabe.match(/[#?&]t=([A-Za-z0-9_-]{16,128})/) ||
+    eingabe.match(/^([A-Za-z0-9_-]{16,128})$/);
+  if (!treffer) {
+    fehler.textContent = 'Das sieht nicht nach einem Einladungslink aus.';
+    fehler.hidden = false;
+    return;
+  }
+  localStorage.setItem(TOKEN_KEY, treffer[1]);
+  location.reload();
+});
+
 async function start() {
   if (!API) {
     el('gate').hidden = false;
@@ -506,3 +538,4 @@ async function start() {
 }
 
 start();
+

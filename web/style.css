@@ -295,6 +295,19 @@ button.icon:hover { background: var(--line); color: var(--text); }
   border-top: 1px solid var(--line);
 }
 
+/* Schritt-fuer-Schritt-Anleitung im Profil-Popup. */
+.steps {
+  margin: var(--sp-8) 0;
+  padding-left: var(--sp-24);
+  font-size: var(--text-sm);
+}
+.steps li { margin: var(--sp-4) 0; }
+.glyph {
+  display: inline-flex;
+  vertical-align: -3px;
+  color: var(--accent);
+}
+
 /* -------------------------------------------------------------------- Admin */
 
 #users { list-style: none; padding: 0; margin: var(--sp-16) 0 0; }

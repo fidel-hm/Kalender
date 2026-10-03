@@ -6,6 +6,11 @@
 <meta name="color-scheme" content="light dark">
 <title>Freundeskalender</title>
 <link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#3b5bdb">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Kalender">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📅</text></svg>">
 </head>
 <body>
@@ -21,6 +26,12 @@
     <h2>Willkommen</h2>
     <p id="gate-text">Du brauchst einen persönlichen Einladungslink, um den Kalender zu sehen.
        Frag einfach in der Gruppe nach.</p>
+    <form id="gate-form">
+      <label>Einladungslink einfügen
+        <input name="link" placeholder="https://…#t=…" required></label>
+      <div class="row actions"><button type="submit">Anmelden</button></div>
+      <p class="error" id="gate-error" hidden></p>
+    </form>
   </section>
 
   <section id="app" hidden>
@@ -73,6 +84,30 @@
       <div class="row actions"><button type="submit">Speichern</button></div>
       <p class="error" id="profile-error" hidden></p>
     </form>
+
+    <p class="sub"><b>Als App hinzufügen</b></p>
+    <p class="muted small" id="install-done" hidden>Läuft bereits als App.</p>
+    <div id="install-box">
+      <p class="muted small">Dann liegt der Kalender als eigenes Symbol auf dem Startbildschirm
+         und öffnet ohne Adressleiste.</p>
+      <ol class="steps">
+        <li>Deinen Einladungslink kopieren, du brauchst ihn in Schritt 4:
+            <br><button type="button" id="install-copy" class="ghost">Link kopieren</button></li>
+        <li>In Safari unten auf <b>Teilen</b> tippen
+            <span class="glyph" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 15V3"/><path d="M8 7l4-4 4 4"/>
+                <path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/>
+              </svg>
+            </span></li>
+        <li>Nach unten scrollen zu <b>Zum Home-Bildschirm</b>, dann <b>Hinzufügen</b></li>
+        <li>Die neue App öffnen und den Link dort einfügen</li>
+      </ol>
+      <p class="muted small">Schritt 4 ist nötig, weil iOS der App einen eigenen Speicher gibt.
+         Deine Anmeldung aus Safari gilt dort nicht mit. Einmal einfügen genügt, danach bleibt
+         die App angemeldet.</p>
+    </div>
 
     <p class="sub"><b>Kalender abonnieren</b></p>
     <p class="muted small">Dein persönlicher Abo-Link. Er enthält alle Veranstaltungen, bei denen du
