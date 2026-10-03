@@ -233,7 +233,7 @@ function renderProfile() {
   me.textContent = shortNames.get(String(state.me.id)) || state.me.name.slice(0, 1);
   me.style.background = color;
   me.style.color = textOn(color);
-  me.title = `${state.me.name} - Profil öffnen`;
+  me.title = `Profil öffnen (${state.me.name})`;
   me.setAttribute('aria-label', me.title);
   me.hidden = false;
 }

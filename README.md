@@ -5,16 +5,16 @@ jeder antwortet pro Termin per Ampel (**rot / gelb / grün**), und jeder sieht, 
 Dazu ein persönlicher Abo-Link für den Handy-Kalender.
 
 Adressen in den Notizen einer Veranstaltung werden automatisch anklickbar (`http://`,
-`https://` und `www.`); sie öffnen in einem neuen Tab. Verlinkt wird nur, was wirklich eine
-Web-Adresse ist — `javascript:` und `data:` bleiben unangetastet.
+`https://` und `www.`) und öffnen in einem neuen Tab. Verlinkt wird nur, was wirklich eine
+Web-Adresse ist. `javascript:` und `data:` bleiben unangetastet.
 
-Die Ampel ist absichtlich nur farbig und immer in derselben Reihenfolge — rot links,
+Die Ampel ist absichtlich nur farbig und immer in derselben Reihenfolge: rot links,
 grün rechts. Wer wie geantwortet hat, steht in der Spalte direkt unter dem jeweiligen Knopf,
 die Zuordnung hängt also nicht allein an der Farbe. Vorlesesoftware bekommt die Bedeutung
 über `aria-label`.
 
-- **Frontend**: statische Seite auf GitHub Pages (`web/`) — kein Build-Schritt, kein Framework.
-- **Backend**: ein Cloudflare Worker mit D1-Datenbank (`worker/`) — liefert API und ICS-Feed.
+- **Frontend**: statische Seite auf GitHub Pages (`web/`), ohne Build-Schritt und ohne Framework.
+- **Backend**: ein Cloudflare Worker mit D1-Datenbank (`worker/`), liefert API und ICS-Feed.
 - **Anmeldung**: persönlicher Einladungslink. Einmal öffnen, danach bleibt man eingeloggt.
 
 ---
@@ -52,7 +52,7 @@ npm run deploy              # gibt die Worker-URL aus, z.B. https://kalender.DEI
 ```
 
 Bei einer **bereits bestehenden** Datenbank legt `db:init` keine neuen Spalten an
-(`CREATE TABLE IF NOT EXISTS`). Dafür gibt es `worker/migrations/` — jede Datei einmal
+(`CREATE TABLE IF NOT EXISTS`). Dafür gibt es `worker/migrations/`. Jede Datei einmal
 anwenden, zum Beispiel:
 
 ```bash
@@ -61,7 +61,7 @@ npx wrangler d1 execute kalender --remote --file migrations/0001_personenfarbe.s
 
 ### 2. Dich selbst als Admin anlegen
 
-Die erste Person muss direkt in der Datenbank angelegt werden — alle weiteren legst du
+Die erste Person muss direkt in der Datenbank angelegt werden. Alle weiteren legst du
 danach bequem auf der Seite an.
 
 ```bash
@@ -75,7 +75,7 @@ npx wrangler d1 execute kalender --remote --command \
 echo "Dein Einladungslink endet auf:  #t=$TOKEN"
 ```
 
-Den Token notieren — er ist dein Zugang.
+Den Token notieren, er ist dein Zugang.
 
 ### 3. Frontend veröffentlichen
 
@@ -110,26 +110,26 @@ ALLOWED_ORIGIN = "https://DEINNAME.github.io"
 ### 5. Freunde einladen
 
 Auf der Seite unter **Personen verwalten** einen Namen eintragen. Es erscheint ein
-persönlicher Einladungslink zum Kopieren — einmal verschicken, fertig. Wer ihn öffnet,
+persönlicher Einladungslink zum Kopieren. Einmal verschicken, fertig. Wer ihn öffnet,
 ist dauerhaft angemeldet und taucht bei allen Veranstaltungen mit seinem Namen auf.
 
 ---
 
 ## Profil, Farben und Zweitgerät
 
-Oben rechts steht ein Kreis mit dem eigenen Kürzel in der eigenen Farbe — ein Klick darauf
+Oben rechts steht ein Kreis mit dem eigenen Kürzel in der eigenen Farbe. Ein Klick darauf
 öffnet **Mein Profil** als Popup (ein natives `<dialog>`; Escape, der Schließknopf oder ein
 Klick daneben schließen es wieder). Dort lassen sich angezeigter Name und Farbe ändern. In dieser Farbe
 erscheint man bei allen anderen in den Veranstaltungen. Neu angelegte Personen bekommen
 reihum automatisch eine Farbe aus einer Palette von zwölf.
 
-Teilnehmer stehen bei den Veranstaltungen als runde Kürzel, nicht ausgeschrieben — sonst
+Teilnehmer stehen bei den Veranstaltungen als runde Kürzel, nicht ausgeschrieben, sonst
 wird es in den drei schmalen Spalten zu eng. Das Kürzel ist normalerweise ein Buchstabe und
 wächst nur dann, wenn zwei Personen sonst nicht zu unterscheiden wären (Karla → „Ka",
 Konst → „Ko"). Der volle Name steckt im `title` und im `aria-label`.
 
 Im selben Popup stecken auch der **Abo-Link für den Handy-Kalender** und unter
-**Weiteres Gerät hinzufügen** der eigene Einladungslink noch einmal zum Kopieren — zum Anmelden auf Handy, Tablet oder in einem zweiten Browser. Es ist
+**Weiteres Gerät hinzufügen** der eigene Einladungslink noch einmal zum Kopieren, zum Anmelden auf Handy, Tablet oder in einem zweiten Browser. Es ist
 derselbe Link wie bei der Einladung; er gilt unbegrenzt und für beliebig viele Geräte.
 
 ## Kalender abonnieren
@@ -148,7 +148,7 @@ feste Termine, alles andere als unverbindlich (`TENTATIVE`, wird nicht als „be
 
 Wer nur die festen Zusagen im Kalender haben will, hängt `?only=yes` an die Abo-Adresse.
 
-**Wichtig:** Handy-Kalender holen Abos in eigenem Rhythmus — iOS je nach Einstellung alle
+**Wichtig:** Handy-Kalender holen Abos in eigenem Rhythmus: iOS je nach Einstellung alle
 5 Minuten bis täglich, Google Calendar oft erst nach Stunden. Änderungen erscheinen also
 nicht sofort. Auf der Webseite dagegen sind sie es.
 
@@ -210,7 +210,7 @@ Dafür in `web/config.js` kurzzeitig `http://127.0.0.1:8787` eintragen und
 `http://127.0.0.1:8080/index.html#t=testtoken1234567890abcd` öffnen.
 
 Der lokale `wrangler dev` würde `ALLOWED_ORIGIN` aus `wrangler.toml` lesen und damit nur die
-Pages-Adresse erlauben. Lege stattdessen `worker/.dev.vars` an — die Datei gilt nur für
+Pages-Adresse erlauben. Lege stattdessen `worker/.dev.vars` an. Die Datei gilt nur für
 `wrangler dev`, wird nie deployt und ist über `.gitignore` ausgeschlossen:
 
 ```
