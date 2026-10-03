@@ -128,13 +128,14 @@ wird es in den drei schmalen Spalten zu eng. Das Kürzel ist normalerweise ein B
 wächst nur dann, wenn zwei Personen sonst nicht zu unterscheiden wären (Karla → „Ka",
 Konst → „Ko"). Der volle Name steckt im `title` und im `aria-label`.
 
-Im selben Bereich steht unter **Weiteres Gerät hinzufügen** der eigene Einladungslink noch
-einmal zum Kopieren — zum Anmelden auf Handy, Tablet oder in einem zweiten Browser. Es ist
+Im selben Popup stecken auch der **Abo-Link für den Handy-Kalender** und unter
+**Weiteres Gerät hinzufügen** der eigene Einladungslink noch einmal zum Kopieren — zum Anmelden auf Handy, Tablet oder in einem zweiten Browser. Es ist
 derselbe Link wie bei der Einladung; er gilt unbegrenzt und für beliebig viele Geräte.
 
 ## Kalender abonnieren
 
-Unter **Kalender abonnieren** findet jeder seinen persönlichen Link.
+Im Profil-Popup (Kreis oben rechts) findet jeder unter **Kalender abonnieren** seinen
+persönlichen Link.
 
 - **iPhone**: auf „Im Handy-Kalender öffnen" tippen (`webcal://`-Link).
 - **Android / Google Kalender**: die `https://…/ics/….ics`-Adresse kopieren und unter

@@ -100,7 +100,7 @@ summary.button { list-style: none; width: 100%; text-align: center; margin-botto
 summary.button::-webkit-details-marker { display: none; }
 
 details#new-event[open] summary.button { margin-bottom: 1rem; }
-details#subscribe, details#admin {
+details#admin {
   margin-top: 2rem;
   padding-top: .75rem;
   border-top: 1px solid var(--line);
@@ -283,5 +283,18 @@ button.icon:hover { background: var(--line); color: var(--text); }
 #users li .avatar { vertical-align: middle; margin-right: .2rem; }
 #users .invite { display: flex; gap: .5rem; margin-top: .35rem; }
 #users .invite input { font-size: .8rem; }
+
+/* Unauffaelliger Textschalter - die Veranstaltungen sollen die Seite tragen. */
+#show-past-wrap { margin: .4rem 0 0; text-align: center; }
+#show-past {
+  padding: .2rem .3rem;
+  border: none;
+  background: none;
+  color: var(--muted);
+  font-size: .8rem;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+#show-past:hover { color: var(--text); }
 
 #status { text-align: center; min-height: 1.5rem; }
