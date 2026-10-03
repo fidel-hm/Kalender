@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Freundeskalender</title>
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📅</text></svg>">
+</head>
+<body>
+
+<header>
+  <h1>Kalender</h1>
+  <div id="whoami" class="muted"></div>
+</header>
+
+<main>
+  <!-- Wird angezeigt, solange kein gueltiges Token im Browser liegt -->
+  <section id="gate" hidden>
+    <h2>Willkommen</h2>
+    <p id="gate-text">Du brauchst einen persönlichen Einladungslink, um den Kalender zu sehen.
+       Frag einfach in der Gruppe nach.</p>
+  </section>
+
+  <section id="app" hidden>
+    <details id="new-event">
+      <summary class="button">+ Veranstaltung</summary>
+      <form id="event-form">
+        <input type="hidden" name="id">
+        <label>Was? <input name="title" maxlength="200" required placeholder="Konzert, Bar, Wandern …"></label>
+        <label class="check"><input type="checkbox" name="all_day"> Ganztägig</label>
+        <div class="row">
+          <label>Beginn <input name="start" type="datetime-local" required></label>
+          <label>Ende <span class="muted">(optional)</span> <input name="end" type="datetime-local"></label>
+        </div>
+        <label>Wo? <span class="muted">(optional)</span> <input name="location" maxlength="200"></label>
+        <label>Notizen <span class="muted">(optional)</span> <textarea name="description" rows="2" maxlength="2000"></textarea></label>
+        <div class="row actions">
+          <button type="submit">Speichern</button>
+          <button type="button" id="event-cancel" class="ghost">Abbrechen</button>
+        </div>
+        <p class="error" id="event-error" hidden></p>
+      </form>
+    </details>
+
+    <div id="events"></div>
+
+    <p id="show-past-wrap"><button type="button" id="show-past" class="ghost">Vergangene anzeigen</button></p>
+
+    <details id="subscribe">
+      <summary>Kalender abonnieren</summary>
+      <p class="muted">Dein persönlicher Abo-Link. Er enthält alle Veranstaltungen, bei denen du
+         <em>nicht</em> abgesagt hast — sagst du ab, verschwindet der Termin beim nächsten Sync wieder.</p>
+      <p><a id="ics-webcal" class="button">Im Handy-Kalender öffnen</a></p>
+      <p><input id="ics-url" readonly> <button type="button" id="ics-copy" class="ghost">Kopieren</button></p>
+      <p class="muted small">Handy-Kalender aktualisieren Abos in eigenem Rhythmus — iOS je nach Einstellung
+         alle 5 Minuten bis täglich, Google Calendar teils erst nach Stunden. Der Link ist geheim:
+         wer ihn hat, sieht deinen Kalender.</p>
+    </details>
+
+    <details id="admin" hidden>
+      <summary>Personen verwalten</summary>
+      <form id="user-form" class="row">
+        <input name="name" maxlength="60" required placeholder="Name">
+        <button type="submit">Anlegen</button>
+      </form>
+      <p class="error" id="user-error" hidden></p>
+      <ul id="users"></ul>
+    </details>
+  </section>
+</main>
+
+<p id="status" class="muted small" aria-live="polite"></p>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

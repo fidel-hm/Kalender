@@ -1,0 +1,172 @@
+:root {
+  --bg: #fbfaf8;
+  --card: #ffffff;
+  --text: #1c1b19;
+  --muted: #6d6a64;
+  --line: #e3e0d9;
+  --accent: #3b5bdb;
+  --yes: #2f9e44;
+  --maybe: #e8a700;
+  --no: #c23b3b;
+  --radius: 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #17181a;
+    --card: #202225;
+    --text: #e9e8e5;
+    --muted: #9b9892;
+    --line: #34363a;
+    --accent: #7a93f5;
+    --yes: #5fc777;
+    --maybe: #e3b341;
+    --no: #e07070;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0 auto;
+  padding: 1rem 1rem 3rem;
+  max-width: 44rem;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+h1 { font-size: 1.4rem; margin: 0; }
+h2 { font-size: 1.1rem; }
+
+.muted { color: var(--muted); }
+.small { font-size: .85rem; }
+.error { color: var(--no); }
+
+/* ------------------------------------------------------------- Formularteile */
+
+label { display: block; margin: .6rem 0; }
+label.check { display: flex; align-items: center; gap: .5rem; }
+label.check input { width: auto; margin: 0; }
+
+input, textarea, button, select {
+  font: inherit;
+  color: inherit;
+}
+
+input:not([type="checkbox"]), textarea {
+  width: 100%;
+  margin-top: .2rem;
+  padding: .5rem .6rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+textarea { resize: vertical; }
+
+button, .button {
+  display: inline-block;
+  padding: .45rem .9rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  cursor: pointer;
+}
+button.ghost, summary.button {
+  background: var(--card);
+  border-color: var(--line);
+  color: var(--text);
+}
+button:disabled { opacity: .5; cursor: default; }
+
+.row { display: flex; gap: .75rem; flex-wrap: wrap; align-items: flex-end; }
+.row > * { flex: 1 1 10rem; margin: 0; }
+.row.actions > * { flex: 0 0 auto; }
+
+summary { cursor: pointer; }
+summary.button { list-style: none; width: 100%; text-align: center; margin-bottom: .5rem; }
+summary.button::-webkit-details-marker { display: none; }
+
+details#new-event[open] summary.button { margin-bottom: 1rem; }
+details#subscribe, details#admin {
+  margin-top: 2rem;
+  padding-top: .75rem;
+  border-top: 1px solid var(--line);
+}
+
+/* ------------------------------------------------------------------- Events */
+
+.month {
+  margin: 1.75rem 0 .6rem;
+  font-size: .8rem;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.event {
+  padding: .85rem 1rem;
+  margin-bottom: .6rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+.event.past { opacity: .55; }
+
+.event .when { font-size: .85rem; color: var(--muted); }
+.event .title { font-weight: 600; margin: .15rem 0; }
+.event .where, .event .notes { font-size: .9rem; }
+.event .notes { white-space: pre-wrap; margin-top: .3rem; }
+
+.rsvp { display: flex; gap: .4rem; margin: .7rem 0 .5rem; flex-wrap: wrap; }
+.rsvp button {
+  flex: 1 1 6rem;
+  padding: .4rem .5rem;
+  font-size: .85rem;
+  background: var(--card);
+  border-color: var(--line);
+  color: var(--muted);
+}
+.rsvp button[aria-pressed="true"] { color: #fff; border-color: transparent; }
+.rsvp button[data-status="yes"][aria-pressed="true"]   { background: var(--yes); }
+.rsvp button[data-status="maybe"][aria-pressed="true"] { background: var(--maybe); color: #1c1b19; }
+.rsvp button[data-status="no"][aria-pressed="true"]    { background: var(--no); }
+
+.who { font-size: .85rem; color: var(--muted); }
+.who div { margin-top: .15rem; }
+.who b { font-weight: 600; }
+.who .k-yes b   { color: var(--yes); }
+.who .k-maybe b { color: var(--maybe); }
+.who .k-no b    { color: var(--no); }
+
+.event-admin { margin-top: .5rem; display: flex; gap: .75rem; font-size: .85rem; }
+.event-admin button {
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--muted);
+  text-decoration: underline;
+}
+
+/* -------------------------------------------------------------------- Admin */
+
+#users { list-style: none; padding: 0; }
+#users li {
+  padding: .6rem 0;
+  border-bottom: 1px solid var(--line);
+}
+#users .invite { display: flex; gap: .5rem; margin-top: .35rem; }
+#users .invite input { font-size: .8rem; }
+
+#status { text-align: center; min-height: 1.5rem; }
